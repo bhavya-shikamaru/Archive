@@ -12,22 +12,22 @@ const getStats = async (req, res, next) => {
     const [companyCount] = await pool.query(
       `SELECT 
         COUNT(*) AS total,
-        SUM(CASE WHEN approved = 0 THEN 1 ELSE 0 END) AS pending,
-        SUM(CASE WHEN approved = 1 THEN 1 ELSE 0 END) AS approved
+        COALESCE(SUM(CASE WHEN approved = 0 THEN 1 ELSE 0 END), 0) AS pending,
+        COALESCE(SUM(CASE WHEN approved = 1 THEN 1 ELSE 0 END), 0) AS approved
        FROM companies`
     );
     const [driveCount] = await pool.query(
       `SELECT 
         COUNT(*) AS total,
-        SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) AS active
+        COALESCE(SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END), 0) AS active
        FROM drives`
     );
     const [placedCount] = await pool.query(
       "SELECT COUNT(DISTINCT student_id) AS total FROM applications WHERE status = 'selected'"
     );
 
-    const totalStudents = studentCount[0].total || 0;
-    const totalPlaced = placedCount[0].total || 0;
+    const totalStudents = studentCount[0]?.total || 0;
+    const totalPlaced = placedCount[0]?.total || 0;
     const placementRate = totalStudents > 0 ? ((totalPlaced / totalStudents) * 100).toFixed(1) : 0;
 
     // 2. Branch-wise placement statistics (For Pie/Doughnut Chart)
@@ -53,7 +53,7 @@ const getStats = async (req, res, next) => {
        JOIN drives d ON a.drive_id = d.id
        JOIN companies c ON d.company_id = c.id
        WHERE a.status = 'selected'
-       GROUP BY c.id
+       GROUP BY c.id, c.name
        ORDER BY total_hires DESC
        LIMIT 10`
     );
@@ -64,11 +64,11 @@ const getStats = async (req, res, next) => {
         total_students: totalStudents,
         total_placed: totalPlaced,
         placement_rate_pct: parseFloat(placementRate),
-        total_companies: companyCount[0].total || 0,
-        pending_companies: companyCount[0].pending || 0,
-        approved_companies: companyCount[0].approved || 0,
-        total_drives: driveCount[0].total || 0,
-        active_drives: driveCount[0].active || 0
+        total_companies: companyCount[0]?.total || 0,
+        pending_companies: companyCount[0]?.pending || 0,
+        approved_companies: companyCount[0]?.approved || 0,
+        total_drives: driveCount[0]?.total || 0,
+        active_drives: driveCount[0]?.active || 0
       },
       charts: {
         branch_stats: branchStats,
@@ -88,11 +88,12 @@ const getCompanies = async (req, res, next) => {
   try {
     const { status } = req.query; // 'pending', 'approved', 'rejected'
     let query = `
-      SELECT c.*, u.email,
-        COUNT(d.id) AS drives_posted
+      SELECT 
+        c.*, 
+        u.email,
+        (SELECT COUNT(*) FROM drives d WHERE d.company_id = c.id) AS drives_posted
       FROM companies c
       JOIN users u ON c.user_id = u.id
-      LEFT JOIN drives d ON c.id = d.company_id
     `;
     const params = [];
 
@@ -104,7 +105,7 @@ const getCompanies = async (req, res, next) => {
       query += ' WHERE c.approved = 2';
     }
 
-    query += ' GROUP BY c.id ORDER BY c.created_at DESC';
+    query += ' ORDER BY c.created_at DESC';
 
     const [companies] = await pool.query(query, params);
 
@@ -199,13 +200,14 @@ const getAllStudents = async (req, res, next) => {
 const getAllDrives = async (req, res, next) => {
   try {
     const [drives] = await pool.query(
-      `SELECT d.*, c.name AS company_name, c.approved AS company_approved,
-        COUNT(a.id) AS total_applicants,
-        SUM(CASE WHEN a.status = 'selected' THEN 1 ELSE 0 END) AS selected_count
+      `SELECT 
+        d.*, 
+        c.name AS company_name, 
+        c.approved AS company_approved,
+        (SELECT COUNT(*) FROM applications a WHERE a.drive_id = d.id) AS total_applicants,
+        (SELECT COUNT(*) FROM applications a WHERE a.drive_id = d.id AND a.status = 'selected') AS selected_count
        FROM drives d
        JOIN companies c ON d.company_id = c.id
-       LEFT JOIN applications a ON d.id = a.drive_id
-       GROUP BY d.id
        ORDER BY d.created_at DESC`
     );
 

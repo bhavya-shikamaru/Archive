@@ -50,17 +50,50 @@ const AdminDashboard = () => {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      const [statsRes, compRes, studRes, driveRes] = await Promise.all([
+      const results = await Promise.allSettled([
         api.get('/admin/stats'),
         api.get('/admin/companies'),
         api.get('/admin/students'),
         api.get('/admin/drives')
       ]);
-      if (statsRes.data.success) setStats(statsRes.data);
-      if (compRes.data.success) setCompanies(compRes.data.data || []);
-      if (studRes.data.success) setStudents(studRes.data.data || []);
-      if (driveRes.data.success) setDrives(driveRes.data.data || []);
+
+      const [statsRes, compRes, studRes, driveRes] = results;
+
+      if (statsRes.status === 'fulfilled' && statsRes.value?.data?.success) {
+        setStats(statsRes.value.data);
+      } else if (statsRes.status === 'rejected') {
+        console.error('Failed to load /admin/stats:', statsRes.reason?.response?.data || statsRes.reason);
+      }
+
+      if (compRes.status === 'fulfilled' && compRes.value?.data?.success) {
+        setCompanies(compRes.value.data.data || []);
+      } else if (compRes.status === 'rejected') {
+        console.error('Failed to load /admin/companies:', compRes.reason?.response?.data || compRes.reason);
+      }
+
+      if (studRes.status === 'fulfilled' && studRes.value?.data?.success) {
+        setStudents(studRes.value.data.data || []);
+      } else if (studRes.status === 'rejected') {
+        console.error('Failed to load /admin/students:', studRes.reason?.response?.data || studRes.reason);
+      }
+
+      if (driveRes.status === 'fulfilled' && driveRes.value?.data?.success) {
+        setDrives(driveRes.value.data.data || []);
+      } else if (driveRes.status === 'rejected') {
+        console.error('Failed to load /admin/drives:', driveRes.reason?.response?.data || driveRes.reason);
+      }
+
+      const allFailed = results.every(r => r.status === 'rejected');
+      if (allFailed) {
+        addToast('Failed to load dashboard data.', 'error');
+      } else {
+        const someFailed = results.some(r => r.status === 'rejected');
+        if (someFailed) {
+          addToast('Some dashboard sections failed to load.', 'warning');
+        }
+      }
     } catch (err) {
+      console.error('Admin fetch error:', err);
       addToast('Failed to load dashboard data.', 'error');
     } finally {
       setLoading(false);

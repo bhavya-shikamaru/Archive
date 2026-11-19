@@ -99,13 +99,11 @@ const getMyDrives = async (req, res, next) => {
 
     const [drives] = await pool.query(
       `SELECT d.*,
-        COUNT(a.id) AS total_applicants,
-        SUM(CASE WHEN a.status = 'selected' THEN 1 ELSE 0 END) AS selected_count,
-        SUM(CASE WHEN a.status = 'shortlisted' THEN 1 ELSE 0 END) AS shortlisted_count
+        (SELECT COUNT(*) FROM applications a WHERE a.drive_id = d.id) AS total_applicants,
+        (SELECT COUNT(*) FROM applications a WHERE a.drive_id = d.id AND a.status = 'selected') AS selected_count,
+        (SELECT COUNT(*) FROM applications a WHERE a.drive_id = d.id AND a.status = 'shortlisted') AS shortlisted_count
        FROM drives d
-       LEFT JOIN applications a ON d.id = a.drive_id
        WHERE d.company_id = ?
-       GROUP BY d.id
        ORDER BY d.created_at DESC`,
       [companyId]
     );
