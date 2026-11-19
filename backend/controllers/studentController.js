@@ -103,7 +103,6 @@ const uploadResume = async (req, res, next) => {
 
     let resumeUrl = `/uploads/resumes/${req.file.filename}`;
 
-    // Upload to Cloudinary if configured for persistent storage
     if (process.env.CLOUDINARY_CLOUD_NAME) {
       const cloudUrl = await uploadToCloudinary(req.file.path, req.file.originalname);
       if (cloudUrl) {

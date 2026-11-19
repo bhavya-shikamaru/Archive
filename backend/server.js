@@ -20,11 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve frontend static files (HTML, CSS, JS)
 const frontendDir = path.join(__dirname, '../frontend');
 app.use(express.static(frontendDir));
 
-// Clean URL routes for frontend HTML pages
 app.get('/login', (req, res) => res.sendFile(path.join(frontendDir, 'login.html')));
 app.get('/register', (req, res) => res.sendFile(path.join(frontendDir, 'register.html')));
 app.get('/student', (req, res) => res.sendFile(path.join(frontendDir, 'student.html')));

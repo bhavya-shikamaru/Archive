@@ -1,13 +1,9 @@
 const { pool } = require('../config/db');
 const xlsx = require('xlsx');
 
-/**
- * Controller: Get placement analytics, counts, and chart data
- * GET /admin/stats
- */
 const getStats = async (req, res, next) => {
   try {
-    // 1. Overall counts
+    
     const [studentCount] = await pool.query('SELECT COUNT(*) AS total FROM students');
     const [companyCount] = await pool.query(
       `SELECT 
@@ -30,7 +26,6 @@ const getStats = async (req, res, next) => {
     const totalPlaced = placedCount[0]?.total || 0;
     const placementRate = totalStudents > 0 ? ((totalPlaced / totalStudents) * 100).toFixed(1) : 0;
 
-    // 2. Branch-wise placement statistics (For Pie/Doughnut Chart)
     const [branchStats] = await pool.query(
       `SELECT 
         s.branch,
@@ -43,7 +38,6 @@ const getStats = async (req, res, next) => {
        ORDER BY placed_students DESC`
     );
 
-    // 3. Company-wise selections (For Bar Chart)
     const [companyStats] = await pool.query(
       `SELECT 
         c.name AS company_name,
@@ -80,13 +74,9 @@ const getStats = async (req, res, next) => {
   }
 };
 
-/**
- * Controller: Get all registered companies with approval status
- * GET /admin/companies
- */
 const getCompanies = async (req, res, next) => {
   try {
-    const { status } = req.query; // 'pending', 'approved', 'rejected'
+    const { status } = req.query; 
     let query = `
       SELECT 
         c.*, 
@@ -118,14 +108,10 @@ const getCompanies = async (req, res, next) => {
   }
 };
 
-/**
- * Controller: Approve or Reject a company account
- * PUT /admin/companies/:id/approve
- */
 const approveCompany = async (req, res, next) => {
   try {
     const companyId = parseInt(req.params.id, 10);
-    const { approved } = req.body; // 1 = Approved, 2 = Rejected
+    const { approved } = req.body; 
 
     if (![1, 2].includes(Number(approved))) {
       return res.status(400).json({
@@ -157,10 +143,6 @@ const approveCompany = async (req, res, next) => {
   }
 };
 
-/**
- * Controller: Get all registered students with placement status
- * GET /admin/students
- */
 const getAllStudents = async (req, res, next) => {
   try {
     const [students] = await pool.query(
@@ -193,10 +175,6 @@ const getAllStudents = async (req, res, next) => {
   }
 };
 
-/**
- * Controller: Get all drives across all companies
- * GET /admin/drives
- */
 const getAllDrives = async (req, res, next) => {
   try {
     const [drives] = await pool.query(
@@ -220,11 +198,6 @@ const getAllDrives = async (req, res, next) => {
   }
 };
 
-/**
- * Controller: Export Placed Students report to Excel (.xlsx)
- * GET /admin/export-placed
- * Complies with Rubric "Export reports to Excel" requirement
- */
 const exportPlacedToExcel = async (req, res, next) => {
   try {
     const [rows] = await pool.query(
@@ -247,13 +220,11 @@ const exportPlacedToExcel = async (req, res, next) => {
        ORDER BY s.branch ASC, d.package_lpa DESC`
     );
 
-    // Create a new Excel workbook
     const workbook = xlsx.utils.book_new();
     const worksheet = xlsx.utils.json_to_sheet(rows);
 
     xlsx.utils.book_append_sheet(workbook, worksheet, 'Placed Students');
 
-    // Generate buffer
     const excelBuffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
 
     res.setHeader(

@@ -9,30 +9,23 @@ try {
     });
   }
 } catch (e) {
-  // Cloudinary not installed, local storage fallback will be used
+  
 }
 const fs = require('fs');
 
-/**
- * Uploads a local file to Cloudinary for persistent storage
- * @param {string} filePath - Absolute path to local file
- * @param {string} originalName - Original filename
- * @returns {Promise<string|null>} - Returns secure URL if uploaded, null if Cloudinary not configured
- */
 const uploadToCloudinary = async (filePath, originalName) => {
   if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY) {
-    return null; // Fallback to local storage
+    return null; 
   }
 
   try {
     const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: 'raw', // Preserves PDF format
+      resource_type: 'raw', 
       folder: 'cpms_resumes',
       use_filename: true,
       unique_filename: true
     });
 
-    // Delete local temporary file after successful cloud upload
     if (fs.existsSync(filePath)) {
       try {
         fs.unlinkSync(filePath);
@@ -44,7 +37,7 @@ const uploadToCloudinary = async (filePath, originalName) => {
     return result.secure_url;
   } catch (error) {
     console.error('❌ Cloudinary Upload Error:', error.message);
-    return null; // Fall back to local URL if cloud upload fails
+    return null; 
   }
 };
 
