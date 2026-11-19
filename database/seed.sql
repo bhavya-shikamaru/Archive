@@ -22,7 +22,7 @@ INSERT INTO `users` (`id`, `email`, `password_hash`, `role`) VALUES
 (9, 'jobs@startuphub.ai',       '$2b$10$pzD9HhiFwuVOgI5E1UTJDOosC7jt53OhdniRCa18MMUQHCxWYxoNS', 'company');
 
 INSERT INTO `students` (`id`, `user_id`, `name`, `enrollment_no`, `branch`, `cgpa`, `backlogs`, `skills`, `resume_url`) VALUES
-(1, 2, 'Rahul Sharma', '0801CS211001', 'CSE', 8.85, 0, 'React, Node.js, MySQL, Python, Data Structures', '/uploads/resumes/sample-resume-rahul.pdf'),
+(1, 2, 'Rahul Sharma', '0801CS211001', 'CSE', 8.85, 0, 'JavaScript, HTML, CSS, Node.js, MySQL, Python, Data Structures', '/uploads/resumes/sample-resume-rahul.pdf'),
 (2, 3, 'Priya Patel',  '0801IT211002', 'IT',  9.10, 0, 'Java, Spring Boot, MySQL, AWS, Docker', '/uploads/resumes/sample-resume-priya.pdf'),
 (3, 4, 'Amit Verma',   '0801EC211003', 'ECE', 7.20, 1, 'Embedded C, IoT, Python, Circuit Design', NULL),
 (4, 5, 'Sneha Gupta',  '0801CS211004', 'CSE', 6.40, 2, 'HTML, CSS, JavaScript, Basic SQL', NULL),
