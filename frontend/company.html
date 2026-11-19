@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruiter Portal - CPMS</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="js/auth.js"></script>
+  <script>
+    if (!auth.checkAuth(['company'])) {
+      
+    }
+  </script>
+</head>
+<body>
+  
+  <header id="navbar"></header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <div class="mb-6 animate-fade-in-up" style="padding-bottom: 1.5rem; border-bottom: 1px solid var(--slate-200);">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="color: var(--primary-600);">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary-600); text-transform: uppercase; letter-spacing: 0.05em;">
+                Recruiter Portal
+              </span>
+            </div>
+            <h1 id="companyNameHeading" style="font-size: 1.85rem;">Company Name</h1>
+            <p id="companyMetaStatus" style="font-size: 0.85rem; color: var(--slate-600); margin-top: 0.25rem;">
+              Industry: <span id="companyIndustryText">Technology</span> | Approval Status: <span id="companyApprovalBadge">—</span>
+            </p>
+          </div>
+
+          <div id="createDriveAction">
+            <button type="button" class="btn btn-primary" onclick="openCreateModal()">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span>Post New Placement Drive</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="pendingApprovalBanner" class="alert alert-warning animate-fade-in" style="display: none;">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="flex-shrink:0;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div>
+          <strong>Account Verification Pending:</strong> Your corporate profile is awaiting review by the College Training & Placement Officer (Admin). Once approved, you will be able to publish placement drives and review candidates.
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-6 animate-fade-in-up">
+        <div class="stat-card">
+          <span class="stat-label">Posted Drives</span>
+          <div class="stat-value" id="kpiDrivesCount">0</div>
+          <span class="stat-subtext text-primary" style="color: var(--primary-600);">Active on student portal</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total Applications</span>
+          <div class="stat-value" id="kpiApplicantsCount">0</div>
+          <span class="stat-subtext">Received across all roles</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Offers Extended</span>
+          <div class="stat-value text-primary" id="kpiSelectedCount">0</div>
+          <span class="stat-subtext" style="color: var(--primary-600);">Placed candidates</span>
+        </div>
+      </div>
+
+      <div class="tab-container animate-fade-in-up">
+        <button type="button" class="tab-btn active" id="tabBtnDrives" onclick="switchCompanyTab('drives')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+          <span>My Placement Drives</span>
+          <span class="tab-badge" id="badgeMyDrives">0</span>
+        </button>
+        <button type="button" class="tab-btn" id="tabBtnApplicants" onclick="switchCompanyTab('applicants')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <span>Review Candidates</span>
+          <span class="tab-badge" id="badgeApplicants">0</span>
+        </button>
+        <button type="button" class="tab-btn" id="tabBtnRounds" onclick="switchCompanyTab('rounds')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+          <span>Hiring Rounds</span>
+          <span class="tab-badge" id="badgeRounds">0</span>
+        </button>
+      </div>
+
+      <section id="tabSecDrives" class="animate-fade-in-up">
+        <div id="companyDrivesGrid" class="grid grid-cols-2 gap-4">
+          
+        </div>
+      </section>
+
+      <section id="tabSecApplicants" class="animate-fade-in-up" style="display: none;">
+        <div class="card" style="padding: 0; overflow: hidden;">
+          
+          <div style="padding: 1rem 1.25rem; background: var(--slate-50); border-bottom: 1px solid var(--slate-200); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div class="flex items-center gap-3">
+              <label class="label" style="margin-bottom: 0;">Select Drive:</label>
+              <select id="applicantsDriveSelector" class="input" style="width: auto; min-width: 250px;">
+                
+              </select>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--slate-500);">
+              Total Applicants: <strong id="selectedDriveApplicantCount" style="color: var(--slate-900);">0</strong>
+            </div>
+          </div>
+
+          <div class="table-container" style="border: none; border-radius: 0;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Candidate Name</th>
+                  <th>Enrollment & Branch</th>
+                  <th>CGPA / Backlogs</th>
+                  <th>Resume</th>
+                  <th>Current Status</th>
+                  <th class="text-right">Update Decision</th>
+                </tr>
+              </thead>
+              <tbody id="applicantsTableBody">
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="tabSecRounds" class="animate-fade-in-up" style="display: none;">
+        <div class="grid grid-cols-3 gap-6">
+          
+          <div class="card">
+            <h3 class="mb-4">Add Interview Round</h3>
+            <form id="addRoundForm">
+              <div class="form-group">
+                <label class="label">Target Drive *</label>
+                <select id="roundTargetDriveSelect" class="input" required></select>
+              </div>
+
+              <div class="form-group">
+                <label class="label">Round Name *</label>
+                <input type="text" id="roundNameInput" required placeholder="e.g. Technical System Design Interview" class="input" />
+              </div>
+
+              <div class="form-group">
+                <label class="label">Scheduled Date & Time</label>
+                <input type="datetime-local" id="roundDateInput" class="input" />
+              </div>
+
+              <button type="submit" id="addRoundBtn" class="btn btn-primary w-full">
+                Create Round
+              </button>
+            </form>
+          </div>
+
+          <div class="card" style="grid-column: span 2;">
+            <h3 class="mb-4">
+              Configured Rounds for Drive (<span id="roundsCountText">0</span>)
+            </h3>
+            <div id="roundsListContainer" style="display: flex; flex-direction: column; gap: 0.75rem;">
+              
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="createDriveModal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Post Placement Drive</h3>
+        <button type="button" class="modal-close-btn" onclick="closeCreateModal()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <form id="createDriveForm">
+        <div class="form-group">
+          <label class="label">Drive Title / Job Role *</label>
+          <input type="text" id="dTitle" required placeholder="e.g. Associate Software Engineer - 2026 Batch" class="input" />
+        </div>
+
+        <div class="form-group">
+          <label class="label">Role Description</label>
+          <textarea id="dDescription" rows="3" placeholder="Key responsibilities, team details, tech stack..." class="input"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Package (in LPA) *</label>
+            <input type="number" id="dPackage" step="0.01" required placeholder="e.g. 14.50" class="input" />
+          </div>
+          <div class="form-group">
+            <label class="label">Minimum CGPA *</label>
+            <input type="number" id="dMinCgpa" step="0.01" min="0" max="10" required value="7.00" class="input" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Permitted Branches (Comma separated) *</label>
+            <input type="text" id="dAllowedBranches" required value="CSE,IT,ECE" class="input" />
+          </div>
+          <div class="form-group">
+            <label class="label">Max Backlogs Allowed *</label>
+            <input type="number" id="dMaxBacklogs" min="0" required value="0" class="input" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Application Deadline *</label>
+          <input type="datetime-local" id="dDeadline" required class="input" />
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3" style="border-top: 1px solid var(--slate-100); margin-top: 1.25rem;">
+          <button type="button" class="btn btn-ghost" onclick="closeCreateModal()">Cancel</button>
+          <button type="submit" id="saveDriveBtn" class="btn btn-primary">Publish Placement Drive</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/company.js"></script>
+</body>
+</html>
