@@ -20,6 +20,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve frontend static files (HTML, CSS, JS)
+const frontendDir = path.join(__dirname, '../frontend');
+app.use(express.static(frontendDir));
+
+// Clean URL routes for frontend HTML pages
+app.get('/login', (req, res) => res.sendFile(path.join(frontendDir, 'login.html')));
+app.get('/register', (req, res) => res.sendFile(path.join(frontendDir, 'register.html')));
+app.get('/student', (req, res) => res.sendFile(path.join(frontendDir, 'student.html')));
+app.get('/company', (req, res) => res.sendFile(path.join(frontendDir, 'company.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(frontendDir, 'admin.html')));
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'online',
@@ -35,10 +46,13 @@ app.use('/api/drives', require('./routes/driveRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 
 app.use((req, res, next) => {
-  res.status(404).json({
-    success: false,
-    message: `API endpoint not found: ${req.method} ${req.originalUrl}`
-  });
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      message: `API endpoint not found: ${req.method} ${req.originalUrl}`
+    });
+  }
+  res.sendFile(path.join(frontendDir, 'index.html'));
 });
 
 app.use((err, req, res, next) => {
