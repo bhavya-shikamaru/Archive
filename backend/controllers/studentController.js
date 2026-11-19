@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const { uploadToCloudinary } = require('../services/cloudUpload');
 
 const getProfile = async (req, res, next) => {
   try {
@@ -100,7 +101,15 @@ const uploadResume = async (req, res, next) => {
       });
     }
 
-    const resumeUrl = `/uploads/resumes/${req.file.filename}`;
+    let resumeUrl = `/uploads/resumes/${req.file.filename}`;
+
+    // Upload to Cloudinary if configured for persistent storage
+    if (process.env.CLOUDINARY_CLOUD_NAME) {
+      const cloudUrl = await uploadToCloudinary(req.file.path, req.file.originalname);
+      if (cloudUrl) {
+        resumeUrl = cloudUrl;
+      }
+    }
 
     await pool.query(
       'UPDATE students SET resume_url = ? WHERE user_id = ?',

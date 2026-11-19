@@ -26,6 +26,10 @@ async function initDatabase() {
     port: parseInt(process.env.DB_PORT || '3306', 10),
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
+    ssl: process.env.DB_SSL === 'true' ? {
+      rejectUnauthorized: true,
+      minVersion: 'TLSv1.2'
+    } : undefined
   });
 
   try {
