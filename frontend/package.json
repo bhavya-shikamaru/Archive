@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "College Placement Management System - Pure HTML, CSS and JavaScript Frontend",
   "scripts": {
+    "build": "echo No build step required for static HTML/CSS/JS",
     "dev": "vite",
     "preview": "vite preview"
   },

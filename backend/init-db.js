@@ -27,8 +27,8 @@ async function initDatabase() {
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     ssl: process.env.DB_SSL === 'true' ? {
-      rejectUnauthorized: true,
-      minVersion: 'TLSv1.2'
+      minVersion: 'TLSv1.2',
+      rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false' ? false : true
     } : undefined
   });
 

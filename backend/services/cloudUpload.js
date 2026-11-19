@@ -20,10 +20,12 @@ const uploadToCloudinary = async (filePath, originalName) => {
 
   try {
     const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: 'raw', 
+      resource_type: 'auto',
       folder: 'cpms_resumes',
       use_filename: true,
-      unique_filename: true
+      unique_filename: true,
+      access_mode: 'public',
+      type: 'upload'
     });
 
     if (fs.existsSync(filePath)) {
